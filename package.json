@@ -1,0 +1,43 @@
+{
+  "name": "homebridge-prom-sensors",
+  "version": "0.1.0",
+  "description": "Expose Prometheus metrics as HomeKit sensors",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rimraf ./dist && tsc",
+    "watch": "tsc -w",
+    "lint": "eslint src/**.ts --max-warnings=0",
+    "prepublishOnly": "npm run lint && npm run build"
+  },
+  "keywords": [
+    "homebridge-plugin",
+    "homebridge",
+    "prometheus",
+    "metrics",
+    "sensors",
+    "homekit"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "engines": {
+    "homebridge": "^1.6.0 || ^2.0.0",
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
+    "homebridge": "^1.8.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.3.0"
+  }
+}

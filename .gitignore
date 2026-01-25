@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+
+# Homebridge dev data (except sample config and startup script)
+homebridge-data/*
+!homebridge-data/config.json
+!homebridge-data/startup.sh
+
+# Planning docs
+PLAN.md

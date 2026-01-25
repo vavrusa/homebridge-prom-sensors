@@ -1,0 +1,39 @@
+{
+    "bridge": {
+        "name": "Homebridge Dev",
+        "username": "0E:95:E8:78:29:E2",
+        "port": 51827,
+        "pin": "031-45-154"
+    },
+    "platforms": [
+        {
+            "platform": "PrometheusMetrics",
+            "name": "Prometheus",
+            "prometheusUrl": "http://prometheus:9090",
+            "defaultPollingInterval": 30,
+            "sensors": [
+                {
+                    "name": "Anker Battery",
+                    "query": "anker_battery_soc_percent",
+                    "type": "battery",
+                    "lowThreshold": 20
+                },
+                {
+                    "name": "Anker Temperature",
+                    "query": "anker_temperature_celsius",
+                    "type": "temperature"
+                },
+                {
+                    "name": "Anker AC Input",
+                    "query": "anker_ac_input_power_watts",
+                    "type": "light"
+                }
+            ]
+        },
+        {
+            "name": "Config",
+            "port": 8581,
+            "platform": "config"
+        }
+    ]
+}

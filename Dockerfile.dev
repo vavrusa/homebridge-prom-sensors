@@ -1,0 +1,17 @@
+FROM homebridge/homebridge:latest
+
+# Build the plugin
+WORKDIR /tmp/plugin
+COPY package*.json ./
+COPY tsconfig.json ./
+COPY src ./src
+
+RUN npm install && npm run build
+
+# Pack it for installation
+RUN npm pack
+
+# Install to Homebridge's plugin directory
+RUN mkdir -p /var/lib/homebridge/node_modules && \
+    cd /var/lib/homebridge && \
+    npm install /tmp/plugin/homebridge-prometheus-sensors-*.tgz

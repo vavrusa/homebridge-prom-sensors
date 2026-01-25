@@ -1,0 +1,92 @@
+{
+  "pluginAlias": "PrometheusMetrics",
+  "pluginType": "platform",
+  "singular": true,
+  "headerDisplay": "Expose Prometheus metrics as HomeKit sensors",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "default": "Prometheus",
+        "required": true
+      },
+      "prometheusUrl": {
+        "title": "Prometheus URL",
+        "type": "string",
+        "placeholder": "http://192.168.1.100:9090",
+        "required": true,
+        "description": "URL of your Prometheus server"
+      },
+      "defaultPollingInterval": {
+        "title": "Default Polling Interval",
+        "type": "integer",
+        "default": 30,
+        "minimum": 5,
+        "maximum": 3600,
+        "description": "Default interval in seconds between metric queries"
+      },
+      "sensors": {
+        "title": "Sensors",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string",
+              "required": true,
+              "description": "Display name in HomeKit"
+            },
+            "query": {
+              "title": "PromQL Query",
+              "type": "string",
+              "required": true,
+              "description": "Prometheus query that returns a single numeric value"
+            },
+            "type": {
+              "title": "Sensor Type",
+              "type": "string",
+              "required": true,
+              "oneOf": [
+                { "title": "Temperature", "enum": ["temperature"] },
+                { "title": "Humidity", "enum": ["humidity"] },
+                { "title": "Battery", "enum": ["battery"] },
+                { "title": "Contact", "enum": ["contact"] },
+                { "title": "Motion", "enum": ["motion"] },
+                { "title": "Leak", "enum": ["leak"] },
+                { "title": "Light (Lux)", "enum": ["light"] },
+                { "title": "Occupancy", "enum": ["occupancy"] }
+              ],
+              "description": "Type of HomeKit sensor to create"
+            },
+            "pollingInterval": {
+              "title": "Polling Interval",
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 3600,
+              "description": "Override default polling interval for this sensor (seconds)"
+            },
+            "threshold": {
+              "title": "Threshold",
+              "type": "number",
+              "default": 0.5,
+              "description": "For binary sensors (contact, motion, leak, occupancy): value >= threshold means triggered"
+            },
+            "lowThreshold": {
+              "title": "Low Battery Threshold",
+              "type": "integer",
+              "default": 20,
+              "minimum": 0,
+              "maximum": 100,
+              "description": "For battery sensors: level below this triggers low battery warning"
+            }
+          }
+        }
+      }
+    }
+  },
+  "form": null,
+  "display": null
+}

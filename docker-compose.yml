@@ -1,0 +1,17 @@
+services:
+  homebridge:
+    image: homebridge/homebridge:latest
+    container_name: homebridge-dev
+    ports:
+      - "8581:8581"
+      - "51827:51827"
+    volumes:
+      - ./homebridge-data:/homebridge
+      - ./src:/plugin/src
+      - ./package.json:/plugin/package.json
+      - ./package-lock.json:/plugin/package-lock.json
+      - ./tsconfig.json:/plugin/tsconfig.json
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
