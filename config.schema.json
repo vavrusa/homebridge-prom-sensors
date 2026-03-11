@@ -42,8 +42,17 @@
             "query": {
               "title": "PromQL Query",
               "type": "string",
-              "required": true,
-              "description": "Prometheus query that returns a single numeric value"
+              "required": false,
+              "description": "Prometheus query that returns a single numeric value (use 'queries' for multiple)"
+            },
+            "queries": {
+              "title": "PromQL Queries",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "required": false,
+              "description": "Array of Prometheus queries for sensors needing multiple values"
             },
             "type": {
               "title": "Sensor Type",
