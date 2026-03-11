@@ -90,6 +90,13 @@
               "minimum": 0,
               "maximum": 100,
               "description": "For battery sensors: level below this triggers low battery warning"
+            },
+            "maxChargingRate": {
+              "title": "Max Charging Rate (Watts)",
+              "type": "integer",
+              "default": 250,
+              "minimum": 1,
+              "description": "For battery sensors: maximum power output in Watts for lightbulb brightness scaling"
             }
           }
         }

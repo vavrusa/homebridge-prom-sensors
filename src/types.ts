@@ -25,6 +25,8 @@ export interface SensorConfig {
   threshold?: number;
   /** For battery: level below this triggers StatusLowBattery (default: 20) */
   lowThreshold?: number;
+  /** For battery with charging: max charging rate to scale lux value (default: 250) */
+  maxChargingRate?: number;
 }
 
 export interface PrometheusPlatformConfig extends PlatformConfig {

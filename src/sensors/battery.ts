@@ -5,6 +5,7 @@ import { SensorConfig } from '../types';
 
 export class BatterySensor extends BaseSensor {
   private readonly lowThreshold: number;
+  private readonly maxChargingRate: number;
 
   constructor(
     log: Logger,
@@ -16,6 +17,7 @@ export class BatterySensor extends BaseSensor {
   ) {
     super(log, api, accessory, config, prometheus, defaultPollingInterval);
     this.lowThreshold = config.lowThreshold ?? 20;
+    this.maxChargingRate = config.maxChargingRate ?? 250;
   }
 
   initialize(): void {
@@ -33,17 +35,15 @@ export class BatterySensor extends BaseSensor {
 
     this.service?.setCharacteristic(this.Characteristic.BatteryLevel, batteryLevel);
 
-    // Set low battery status
     const statusLowBattery = batteryLevel < this.lowThreshold
       ? this.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
       : this.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
 
     this.service?.setCharacteristic(this.Characteristic.StatusLowBattery, statusLowBattery);
 
-    // ChargingState from second query if available
-    const chargingValue = values[1];
-    if (chargingValue !== undefined) {
-      const isCharging = chargingValue > 0;
+    const chargingStateValue = values[1];
+    if (chargingStateValue !== undefined) {
+      const isCharging = chargingStateValue > 0;
       this.service?.setCharacteristic(
         this.Characteristic.ChargingState,
         isCharging
@@ -51,11 +51,30 @@ export class BatterySensor extends BaseSensor {
           : this.Characteristic.ChargingState.NOT_CHARGING,
       );
     } else {
-      // Default to not charging when no second query
       this.service?.setCharacteristic(
         this.Characteristic.ChargingState,
         this.Characteristic.ChargingState.NOT_CHARGING,
       );
+    }
+
+    const solarPowerValue = values[2];
+    if (solarPowerValue !== undefined) {
+      const lightbulbService = this.accessory.getService(this.Service.Lightbulb)
+        || this.accessory.addService(this.Service.Lightbulb);
+
+      lightbulbService.setCharacteristic(this.Characteristic.Name, `${this.config.name} - Solar Power`);
+      lightbulbService.setCharacteristic(
+        this.Characteristic.ConfiguredName,
+        `${this.config.name} - Solar Power`
+      );
+
+      lightbulbService.getCharacteristic(this.Characteristic.On)
+        .setValue(true);
+
+      lightbulbService.getCharacteristic(this.Characteristic.Brightness)
+        .onGet(() => {
+          return Math.min(100, Math.max(0, (solarPowerValue / this.maxChargingRate) * 100));
+        });
     }
   }
 }
