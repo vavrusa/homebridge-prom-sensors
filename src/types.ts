@@ -15,6 +15,8 @@ export interface SensorConfig {
   name: string;
   /** PromQL query - should return a single value */
   query: string;
+  /** Optional array of PromQL queries for sensors needing multiple values */
+  queries?: string[];
   /** Type of HomeKit sensor to create */
   type: SensorType;
   /** Polling interval in seconds (default: 30) */

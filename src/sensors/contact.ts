@@ -27,10 +27,11 @@ export class ContactSensor extends BaseSensor {
     this.startPolling();
   }
 
-  protected updateCharacteristics(value: number): void {
+  protected updateCharacteristics(value: number | number[]): void {
+    const v = Array.isArray(value) ? value[0] : value;
     // value >= threshold means contact detected (closed)
     // value < threshold means contact not detected (open)
-    const contactState = value >= this.threshold
+    const contactState = v >= this.threshold
       ? this.Characteristic.ContactSensorState.CONTACT_DETECTED
       : this.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;
 

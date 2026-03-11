@@ -55,9 +55,9 @@ export abstract class BaseSensor {
   abstract initialize(): void;
 
   /**
-   * Update HomeKit characteristics with the given value.
+   * Update HomeKit characteristics with the given value(s).
    */
-  protected abstract updateCharacteristics(value: number): void;
+  protected abstract updateCharacteristics(value: number | number[]): void;
 
   /**
    * Start the polling loop.
@@ -88,12 +88,27 @@ export abstract class BaseSensor {
    * Poll Prometheus and update characteristics.
    */
   private async poll(): Promise<void> {
-    const value = await this.prometheus.query(this.config.query);
+    const hasMultipleQueries = this.config.queries && this.config.queries.length > 0;
+
+    let value: number | number[] | null;
+
+    if (hasMultipleQueries) {
+      const results = await Promise.all(
+        this.config.queries!.map((q) => this.prometheus.query(q)),
+      );
+      if (results.some((r) => r === null)) {
+        value = null;
+      } else {
+        value = results as number[];
+      }
+    } else {
+      value = await this.prometheus.query(this.config.query);
+    }
 
     if (value !== null) {
-      this.lastValue = value;
+      this.lastValue = Array.isArray(value) ? value[0] : value;
       this.updateCharacteristics(value);
-      this.log.debug(`${this.config.name}: ${value}`);
+      this.log.debug(`${this.config.name}: ${JSON.stringify(value)}`);
     } else if (this.lastValue !== null) {
       // Keep last known value on error
       this.log.debug(`${this.config.name}: query failed, keeping last value ${this.lastValue}`);
