@@ -65,7 +65,7 @@ export class PrometheusPlatform implements DynamicPlatformPlugin {
         continue;
       }
 
-      const uuid = this.api.hap.uuid.generate(sensorConfig.query);
+      const uuid = this.api.hap.uuid.generate(sensorConfig.queries[0]);
       configuredUUIDs.add(uuid);
 
       let accessory = this.accessories.get(uuid);
@@ -122,8 +122,8 @@ export class PrometheusPlatform implements DynamicPlatformPlugin {
       this.log.error('Sensor config missing "name"');
       return false;
     }
-    if (!config.query) {
-      this.log.error(`Sensor "${config.name}" missing "query"`);
+    if (!config.queries || config.queries.length === 0) {
+      this.log.error(`Sensor "${config.name}" missing "queries"`);
       return false;
     }
     if (!config.type) {

@@ -27,9 +27,8 @@ export class OccupancySensor extends BaseSensor {
     this.startPolling();
   }
 
-  protected updateCharacteristics(value: number | number[]): void {
-    const v = Array.isArray(value) ? value[0] : value;
-    const occupancyDetected = v >= this.threshold
+  protected updateCharacteristics(values: number[]): void {
+    const occupancyDetected = values[0] >= this.threshold
       ? this.Characteristic.OccupancyDetected.OCCUPANCY_DETECTED
       : this.Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED;
 

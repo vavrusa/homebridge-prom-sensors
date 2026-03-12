@@ -31,7 +31,7 @@ export class TemperatureSensor extends BaseSensor {
     this.startPolling();
   }
 
-  protected updateCharacteristics(value: number): void {
-    this.service?.setCharacteristic(this.Characteristic.CurrentTemperature, value);
+  protected updateCharacteristics(values: number[]): void {
+    this.service?.setCharacteristic(this.Characteristic.CurrentTemperature, values[0]);
   }
 }

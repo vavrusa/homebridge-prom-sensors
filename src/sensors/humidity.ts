@@ -24,9 +24,9 @@ export class HumiditySensor extends BaseSensor {
     this.startPolling();
   }
 
-  protected updateCharacteristics(value: number): void {
+  protected updateCharacteristics(values: number[]): void {
     // Clamp to 0-100
-    const humidity = Math.max(0, Math.min(100, value));
+    const humidity = Math.max(0, Math.min(100, values[0]));
     this.service?.setCharacteristic(this.Characteristic.CurrentRelativeHumidity, humidity);
   }
 }

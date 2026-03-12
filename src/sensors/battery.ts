@@ -1,4 +1,4 @@
-import { PlatformAccessory, Logger, API } from 'homebridge';
+import { PlatformAccessory, Logger, API, Service, Perms } from 'homebridge';
 import { BaseSensor } from './base';
 import { PrometheusClient } from '../prometheus';
 import { SensorConfig } from '../types';
@@ -6,6 +6,10 @@ import { SensorConfig } from '../types';
 export class BatterySensor extends BaseSensor {
   private readonly lowThreshold: number;
   private readonly maxChargingRate: number;
+
+  private outletService!: Service;
+  private batteryService!: Service;
+  private lightSensorService!: Service;
 
   constructor(
     log: Logger,
@@ -21,10 +25,38 @@ export class BatterySensor extends BaseSensor {
   }
 
   initialize(): void {
-    this.service = this.accessory.getService(this.Service.Battery)
+    this.accessory.context.Services = [];
+
+    this.outletService = this.accessory.getService(this.Service.Outlet)
+      || this.accessory.addService(this.Service.Outlet, this.config.name);
+
+    this.outletService.setCharacteristic(this.Characteristic.Name, this.config.name);
+    this.outletService.setCharacteristic(
+      this.Characteristic.ConfiguredName,
+      this.config.name
+    );
+
+    this.outletService.getCharacteristic(this.Characteristic.OutletInUse)
+      .onGet(async () => {
+        return await this.isOutletEnabled();
+      });
+
+    this.setOutletReadOnly();
+
+    this.batteryService = this.accessory.getService(this.Service.Battery)
       || this.accessory.addService(this.Service.Battery);
 
-    this.service.setCharacteristic(this.Characteristic.Name, this.config.name);
+    this.batteryService.setCharacteristic(this.Characteristic.Name, `${this.config.name} Battery`);
+    this.outletService.addLinkedService(this.batteryService);
+
+    this.lightSensorService = this.accessory.getService(this.Service.LightSensor)
+      || this.accessory.addService(this.Service.LightSensor);
+
+    this.lightSensorService.setCharacteristic(
+      this.Characteristic.Name,
+      `${this.config.name} Solar Input`
+    );
+    this.outletService.addLinkedService(this.lightSensorService);
 
     this.startPolling();
   }
@@ -33,48 +65,57 @@ export class BatterySensor extends BaseSensor {
     const values = Array.isArray(value) ? value : [value];
     const batteryLevel = Math.max(0, Math.min(100, Math.round(values[0])));
 
-    this.service?.setCharacteristic(this.Characteristic.BatteryLevel, batteryLevel);
+    this.batteryService?.setCharacteristic(this.Characteristic.BatteryLevel, batteryLevel);
 
     const statusLowBattery = batteryLevel < this.lowThreshold
       ? this.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
       : this.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
 
-    this.service?.setCharacteristic(this.Characteristic.StatusLowBattery, statusLowBattery);
+    this.batteryService?.setCharacteristic(this.Characteristic.StatusLowBattery, statusLowBattery);
 
-    const chargingStateValue = values[1];
+    const chargingStateValue = values.length > 1 ? values[1] : undefined;
     if (chargingStateValue !== undefined) {
       const isCharging = chargingStateValue > 0;
-      this.service?.setCharacteristic(
+      this.batteryService?.setCharacteristic(
         this.Characteristic.ChargingState,
         isCharging
           ? this.Characteristic.ChargingState.CHARGING
           : this.Characteristic.ChargingState.NOT_CHARGING,
       );
     } else {
-      this.service?.setCharacteristic(
+      this.batteryService?.setCharacteristic(
         this.Characteristic.ChargingState,
         this.Characteristic.ChargingState.NOT_CHARGING,
       );
     }
 
-    const solarPowerValue = values[2];
+    const solarPowerValue = values.length > 2 ? values[2] : (values.length > 1 ? values[1] : undefined);
     if (solarPowerValue !== undefined) {
-      const lightbulbService = this.accessory.getService(this.Service.Lightbulb)
-        || this.accessory.addService(this.Service.Lightbulb);
-
-      lightbulbService.setCharacteristic(this.Characteristic.Name, `${this.config.name} - Solar Power`);
-      lightbulbService.setCharacteristic(
-        this.Characteristic.ConfiguredName,
-        `${this.config.name} - Solar Power`
+      const luxValue = Math.max(0.0001, solarPowerValue / this.maxChargingRate);
+      this.lightSensorService?.setCharacteristic(
+        this.Characteristic.CurrentAmbientLightLevel,
+        luxValue
       );
-
-      lightbulbService.getCharacteristic(this.Characteristic.On)
-        .setValue(true);
-
-      lightbulbService.getCharacteristic(this.Characteristic.Brightness)
-        .onGet(() => {
-          return Math.min(100, Math.max(0, (solarPowerValue / this.maxChargingRate) * 100));
-        });
     }
+  }
+
+  private async isOutletEnabled(): Promise<boolean> {
+    const outletQueryValue = this.config.queries[3];
+    if (outletQueryValue === undefined) {
+      return false;
+    }
+    try {
+      const result = await this.prometheus.query(outletQueryValue);
+      return result !== null && result > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  setOutletReadOnly(): void {
+    const onCharacteristic = this.outletService.getCharacteristic(this.Characteristic.OutletInUse);
+    onCharacteristic.setProps({
+      perms: [Perms.PAIRED_READ, Perms.NOTIFY]
+    });
   }
 }

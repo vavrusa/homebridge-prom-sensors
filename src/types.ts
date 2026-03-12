@@ -13,10 +13,8 @@ export type SensorType =
 export interface SensorConfig {
   /** Display name in HomeKit */
   name: string;
-  /** PromQL query - should return a single value */
-  query: string;
-  /** Optional array of PromQL queries for sensors needing multiple values */
-  queries?: string[];
+  /** Array of PromQL queries (minimum 1 for sensor type, up to 4 for battery) */
+  queries: string[];
   /** Type of HomeKit sensor to create */
   type: SensorType;
   /** Polling interval in seconds (default: 30) */

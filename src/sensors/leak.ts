@@ -27,9 +27,8 @@ export class LeakSensor extends BaseSensor {
     this.startPolling();
   }
 
-  protected updateCharacteristics(value: number | number[]): void {
-    const v = Array.isArray(value) ? value[0] : value;
-    const leakDetected = v >= this.threshold
+  protected updateCharacteristics(values: number[]): void {
+    const leakDetected = values[0] >= this.threshold
       ? this.Characteristic.LeakDetected.LEAK_DETECTED
       : this.Characteristic.LeakDetected.LEAK_NOT_DETECTED;
 

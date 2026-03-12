@@ -39,20 +39,15 @@
               "required": true,
               "description": "Display name in HomeKit"
             },
-            "query": {
-              "title": "PromQL Query",
-              "type": "string",
-              "required": false,
-              "description": "Prometheus query that returns a single numeric value (use 'queries' for multiple)"
-            },
             "queries": {
               "title": "PromQL Queries",
               "type": "array",
               "items": {
                 "type": "string"
               },
-              "required": false,
-              "description": "Array of Prometheus queries for sensors needing multiple values"
+              "required": true,
+              "minItems": 1,
+              "description": "Array of Prometheus queries (1 for standard sensors, 4 for battery: SOC, charging, solar power, outlet state)"
             },
             "type": {
               "title": "Sensor Type",
@@ -61,7 +56,7 @@
               "oneOf": [
                 { "title": "Temperature", "enum": ["temperature"] },
                 { "title": "Humidity", "enum": ["humidity"] },
-                { "title": "Battery", "enum": ["battery"] },
+                { "title": "Battery (with Solar)", "enum": ["battery"] },
                 { "title": "Contact", "enum": ["contact"] },
                 { "title": "Motion", "enum": ["motion"] },
                 { "title": "Leak", "enum": ["leak"] },
@@ -96,7 +91,7 @@
               "type": "integer",
               "default": 250,
               "minimum": 1,
-              "description": "For battery sensors: maximum power output in Watts for lightbulb brightness scaling"
+              "description": "For battery sensors: maximum power output in Watts for solar lux scaling"
             }
           }
         }

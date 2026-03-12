@@ -24,9 +24,9 @@ export class LightSensor extends BaseSensor {
     this.startPolling();
   }
 
-  protected updateCharacteristics(value: number): void {
+  protected updateCharacteristics(values: number[]): void {
     // Light level in lux, minimum 0.0001
-    const lux = Math.max(0.0001, value);
+    const lux = Math.max(0.0001, values[0]);
     this.service?.setCharacteristic(this.Characteristic.CurrentAmbientLightLevel, lux);
   }
 }

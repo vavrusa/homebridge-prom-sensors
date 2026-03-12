@@ -27,9 +27,8 @@ export class MotionSensor extends BaseSensor {
     this.startPolling();
   }
 
-  protected updateCharacteristics(value: number | number[]): void {
-    const v = Array.isArray(value) ? value[0] : value;
-    const motionDetected = v >= this.threshold;
+  protected updateCharacteristics(values: number[]): void {
+    const motionDetected = values[0] >= this.threshold;
     this.service?.setCharacteristic(this.Characteristic.MotionDetected, motionDetected);
   }
 }
